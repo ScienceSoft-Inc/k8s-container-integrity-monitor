@@ -1,0 +1,5 @@
+apiVersion : v2
+name       : NginxDemo-HelmChart
+description: Helm Chart for demonstration Container Monitor App work
+type       : application
+version    : 0.1.0

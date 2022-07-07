@@ -1,0 +1,13 @@
+container:
+  name: nginx
+  image: nginx:latest
+
+metadata:
+  deploymentName: nginx-hasher-webhook
+  appName: nginx-app
+
+serviceAccount: hasher
+
+replicaCount: 1
+
+processName: nginx
