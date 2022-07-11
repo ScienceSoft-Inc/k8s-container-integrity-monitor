@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-webhook-injector
+  namespace: default
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      component: k8s-webhook-injector
+  template:
+    metadata:
+      labels:
+        component: k8s-webhook-injector
+    spec:
+      containers:
+        - name: k8s-webhook-injector-ws
+          image: {{ .Values.image }}
+          imagePullPolicy: {{ .Values.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.containerPort }}
+          volumeMounts:
+            - name: ssl-k8s-webhook-injector
+              mountPath: /ssl
+      volumes:
+        - name: ssl-k8s-webhook-injector
+          configMap:
+            name: ssl-k8s-webhook-injector

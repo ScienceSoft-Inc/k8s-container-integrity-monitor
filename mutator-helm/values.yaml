@@ -1,0 +1,30 @@
+# Default values for mutator helm
+
+
+# Values for mutator-deployment
+image: dyslexicat/tcpdump-webhook
+pullPolicy: Never
+
+containerPort: 8443
+
+replicaCount: 1
+
+# Values for mutator-ConfigMap
+
+namespaceMap: default
+
+serverCrt: "your certificate"
+serverKey: "your key"
+
+# Values for mutator-configuration
+
+namespaceConf: default
+
+caBundle: "your CA certificate"
+
+# Values for mutator-service
+
+namespaceService: default
+
+port: 443
+targetPort: 8443

@@ -1,0 +1,12 @@
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: {{ .Values.namespaceService }}
+  name: k8s-webhook-injector
+spec:
+  selector:
+    component: k8s-webhook-injector
+  ports:
+    - name: http
+      port: {{ .Values.port }}
+      targetPort: {{ .Values.targetPort }}
