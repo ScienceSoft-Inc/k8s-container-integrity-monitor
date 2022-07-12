@@ -1,7 +1,12 @@
 # Default values for mutator helm
-
+appName: k8s-webhook-injector
+mountPath: /ssl
 
 # Values for mutator-deployment
+
+namespaceDep: default
+
+contName: k8s-webhook-injector-ws
 image: dyslexicat/tcpdump-webhook
 pullPolicy: Never
 
@@ -10,6 +15,8 @@ containerPort: 8443
 replicaCount: 1
 
 # Values for mutator-ConfigMap
+
+confName: ssl-k8s-webhook-injector
 
 namespaceMap: default
 
@@ -21,6 +28,8 @@ serverKey: "your key"
 namespaceConf: default
 
 caBundle: "your CA certificate"
+
+path: "/mutate"
 
 # Values for mutator-service
 

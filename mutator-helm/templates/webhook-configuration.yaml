@@ -1,15 +1,15 @@
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
-  name: k8s-webhook-injector
+  name: {{ .Values.appName }}
 webhooks:
   - name: k8s-webhook-injector.default.svc.cluster.local
     failurePolicy: Fail
     clientConfig:
       service:
-        name: k8s-webhook-injector
+        name: {{ .Values.appName }}
         namespace: {{ .Values.namespaceConf }}
-        path: "/mutate"
+        path: {{ .Values.path }}
       caBundle: {{ .Values.caBundle }}
     rules:
       - operations: [ "CREATE" ]
