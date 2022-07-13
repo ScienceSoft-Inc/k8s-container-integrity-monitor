@@ -54,52 +54,52 @@ func AdmissionResponseFromReview(admReview *admissionv1.AdmissionReview) (*admis
 	log.Println("pod has following labels", pod.Labels)
 	if _, ok := pod.Labels["hasher-webhook-injector-sidecar"]; ok {
 		patch = `[
-		{
-			"op":"add",
-			"path":"/spec/containers/1",
-			"value":{
-				"image":"hasher:latest",
-				"imagePullPolicy":"Never",
-				"name":"hasher-sidecar",
-				"envFrom": [
-				  {
-					"secretRef": {
-					  "name": "hasher-database-secret"
-					}
-				  }
-				],
-                "env": [
-    			  {
-      				"name": "POD_NAME",
-      				"valueFrom": {
-        				"fieldRef": {
-          					"fieldPath": "metadata.name"
-                        }
-                    }
-                  },
-				  {
-					"name": "DEPLOYMENT_TYPE",
-					"value": "deployment"
-				   }	
-                ],
-				"resources": {
-				"limits": {
-				  "memory": "50Mi",
-				  "cpu": "50m"
-					}
-			  	},
-			  	"securityContext": {
-				"capabilities": {
-				  "add": [
-					"SYS_PTRACE"
-				  	]
-                  }
-			  	},
-			    "stdin": true,
-			    "tty": true
-			}
-		}
-	]`
+           {
+               "op":"add",
+               "path":"/spec/containers/1",
+               "value":{
+                   "image":"hasher:latest",
+                   "imagePullPolicy":"Never",
+                   "name":"hasher-sidecar",
+                   "envFrom": [
+                     {
+                       "secretRef": {
+                         "name": "hasher-database-secret"
+                       }
+                     }
+                   ],
+                   "env": [
+                     {
+                       "name": "POD_NAME",
+                       "valueFrom": {
+                         "fieldRef": {
+                           "fieldPath": "metadata.name"
+                         }
+                       }
+                     },
+                     {
+                       "name": "DEPLOYMENT_TYPE",
+                       "value": "deployment"
+                     }	
+                   ],
+                   "resources": {
+                     "limits": {
+                       "memory": "50Mi",
+                       "cpu": "50m"
+                     }
+                   },
+                   "securityContext": {
+                     "capabilities": {
+                       "add": [
+                         "SYS_PTRACE"
+                       ]
+                     }
+                   },
+                   "stdin": true,
+                   "tty": true
+               }
+           }
+        ]`
 	}
 
 	admissionResponse.Allowed = true
