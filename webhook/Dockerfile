@@ -13,6 +13,7 @@ FROM scratch
 WORKDIR /app
 COPY --from=build /usr/local/go/src/k8s-webhook-injector/k8s-webhook-injector .
 COPY --from=build /usr/local/go/src/k8s-webhook-injector/webhook/ssl ssl
+COPY --from=build /usr/local/go/src/k8s-webhook-injector/webhook/patch-json-command.json .
 
 EXPOSE 8443
 

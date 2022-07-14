@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 
 	admissionv1 "k8s.io/api/admission/v1"
 	v1 "k8s.io/api/admission/v1"
@@ -53,55 +55,17 @@ func AdmissionResponseFromReview(admReview *admissionv1.AdmissionReview) (*admis
 
 	log.Println("pod has following labels", pod.Labels)
 	if _, ok := pod.Labels["hasher-webhook-injector-sidecar"]; ok {
-		patch = `[
-           {
-               "op":"add",
-               "path":"/spec/containers/1",
-               "value":{
-                   "image":"hasher:latest",
-                   "imagePullPolicy":"Never",
-                   "name":"hasher-sidecar",
-                   "envFrom": [
-                     {
-                       "secretRef": {
-                         "name": "hasher-database-secret"
-                       }
-                     }
-                   ],
-                   "env": [
-                     {
-                       "name": "POD_NAME",
-                       "valueFrom": {
-                         "fieldRef": {
-                           "fieldPath": "metadata.name"
-                         }
-                       }
-                     },
-                     {
-                       "name": "DEPLOYMENT_TYPE",
-                       "value": "deployment"
-                     }	
-                   ],
-                   "resources": {
-                     "limits": {
-                       "memory": "50Mi",
-                       "cpu": "50m"
-                     }
-                   },
-                   "securityContext": {
-                     "capabilities": {
-                       "add": [
-                         "SYS_PTRACE"
-                       ]
-                     }
-                   },
-                   "stdin": true,
-                   "tty": true
-               }
-           }
-        ]`
+		file, err := os.Open("/app/patch-json-command.json")
+		if err != nil {
+			log.Fatal("error did not opened the file", err)
+		}
+		defer file.Close()
+		data, err := ioutil.ReadAll(file)
+		if err != nil {
+			log.Fatal("error did not read the file", err)
+		}
+		patch = string(data)
 	}
-
 	admissionResponse.Allowed = true
 	if patch != "" {
 		log.Println("patching the pod with:", patch)

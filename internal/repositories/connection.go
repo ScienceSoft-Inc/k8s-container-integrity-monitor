@@ -30,7 +30,7 @@ func InitializeDB(logger *logrus.Logger) (*sql.DB, error) {
 	db, err := sql.Open(connectionDB.Dbdriver, DBURL)
 	if err != nil {
 		logger.Info("Cannot connect to database ", connectionDB.Dbdriver)
-		logger.Fatal("This is the error:", err)
+		return db, err
 	} else {
 		logger.Info("Connected to the database ", connectionDB.Dbdriver)
 	}

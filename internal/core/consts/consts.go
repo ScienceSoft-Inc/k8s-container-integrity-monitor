@@ -1,3 +1,3 @@
 package consts
 
-const TimeOut = 5
+const DefaultContextTimeOut = 5

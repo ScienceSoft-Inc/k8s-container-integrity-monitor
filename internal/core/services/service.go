@@ -3,7 +3,7 @@ package services
 import (
 	"bufio"
 	"context"
-	"fmt"
+	"errors"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -41,19 +41,21 @@ func NewAppService(r *repositories.AppRepository, algorithm string, logger *logr
 }
 
 //GetPID getting pid by process name
-func (as *AppService) GetPID(configData models.ConfigMapData) (int, error) {
+func (as *AppService) GetPID(configData *models.ConfigMapData) (int, error) {
 	if os.Chdir(os.Getenv("PROC_DIR")) != nil {
-		fmt.Println("/proc unavailable.")
-		os.Exit(1)
+		as.logger.Error("/proc unavailable")
+		return 0, errors.New("error changing the current working directory to the named directory")
 	}
 
 	files, err := ioutil.ReadDir(".")
 	if err != nil {
-		fmt.Println("unable to read /proc directory.")
+		as.logger.Error("unable to read /proc directory")
+		return 0, err
 	}
 	var pid int
 	for _, file := range files {
 		if !file.IsDir() {
+			as.logger.Info("file isn't a directory")
 			return 0, err
 		}
 
@@ -66,7 +68,8 @@ func (as *AppService) GetPID(configData models.ConfigMapData) (int, error) {
 		// Open the /proc/xxx/stat file to read the name
 		f, err := os.Open(file.Name() + "/stat")
 		if err != nil {
-			fmt.Println("unable to open", file.Name())
+			as.logger.Error("unable to open", file.Name())
+			return 0, err
 		}
 		defer f.Close()
 
@@ -87,8 +90,8 @@ func (as *AppService) GetPID(configData models.ConfigMapData) (int, error) {
 func (as *AppService) LaunchHasher(ctx context.Context, dirPath string, sig chan os.Signal) []api.HashData {
 	jobs := make(chan string)
 	results := make(chan api.HashData)
-	go as.IHashService.WorkerPool(ctx, jobs, results, as.logger)
-	go api.SearchFilePath(ctx, dirPath, jobs, as.logger)
+	go as.IHashService.WorkerPool(ctx, jobs, results)
+	go api.SearchFilePath(dirPath, jobs, as.logger)
 	allHashData := api.Result(ctx, results, sig)
 
 	return allHashData
@@ -104,9 +107,9 @@ func (as *AppService) IsExistDeploymentNameInDB(deploymentName string) bool {
 }
 
 // StartGetHashData getting the hash sum of all files, outputs to os.Stdout and saves to the database
-func (as *AppService) Start(ctx context.Context, dirPath string, sig chan os.Signal, deploymentData models.DeploymentData) error {
+func (as *AppService) Start(ctx context.Context, dirPath string, sig chan os.Signal, deploymentData *models.DeploymentData) error {
 	allHashData := as.LaunchHasher(ctx, dirPath, sig)
-	err := as.IHashService.SaveHashData(ctx, allHashData, deploymentData)
+	err := as.IHashService.SaveHashData(allHashData, deploymentData)
 	if err != nil {
 		as.logger.Error("Error save hash data to database ", err)
 		return err
@@ -116,10 +119,10 @@ func (as *AppService) Start(ctx context.Context, dirPath string, sig chan os.Sig
 }
 
 // StartCheckHashData getting the hash sum of all files, matches them and outputs to os.Stdout changes
-func (as *AppService) Check(ctx context.Context, dirPath string, sig chan os.Signal, deploymentData models.DeploymentData, kuberData models.KuberData) error {
+func (as *AppService) Check(ctx context.Context, dirPath string, sig chan os.Signal, deploymentData *models.DeploymentData, kuberData *models.KuberData) error {
 	hashDataCurrentByDirPath := as.LaunchHasher(ctx, dirPath, sig)
 
-	dataFromDBbyPodName, err := as.IHashService.GetHashData(ctx, dirPath, deploymentData)
+	dataFromDBbyPodName, err := as.IHashService.GetHashData(dirPath, deploymentData)
 	if err != nil {
 		as.logger.Error("Error getting hash data from database ", err)
 		return err

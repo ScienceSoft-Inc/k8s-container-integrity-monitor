@@ -1,8 +1,6 @@
 package ports
 
 import (
-	"context"
-
 	"github.com/k8s-container-integrity-monitor/internal/core/models"
 	"github.com/k8s-container-integrity-monitor/pkg/api"
 )
@@ -14,7 +12,7 @@ type IAppRepository interface {
 }
 
 type IHashRepository interface {
-	SaveHashData(ctx context.Context, allHashData []api.HashData, deploymentData models.DeploymentData) error
-	GetHashData(ctx context.Context, dirFiles string, algorithm string, deploymentData models.DeploymentData) ([]models.HashDataFromDB, error)
+	SaveHashData(allHashData []api.HashData, deploymentData *models.DeploymentData) error
+	GetHashData(dirFiles string, algorithm string, deploymentData *models.DeploymentData) ([]models.HashDataFromDB, error)
 	DeleteFromTable(nameDeployment string) error
 }

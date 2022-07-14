@@ -1,17 +1,12 @@
 package repositories
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
-	"os"
-	"time"
-
-	"github.com/k8s-container-integrity-monitor/internal/core/consts"
 	"github.com/k8s-container-integrity-monitor/internal/core/models"
 	"github.com/k8s-container-integrity-monitor/pkg/api"
-
 	"github.com/sirupsen/logrus"
+	"os"
 )
 
 type HashRepository struct {
@@ -27,10 +22,7 @@ func NewHashRepository(db *sql.DB, logger *logrus.Logger) *HashRepository {
 }
 
 // SaveHashData iterates through all elements of the slice and triggers the save to database function
-func (hr HashRepository) SaveHashData(ctx context.Context, allHashData []api.HashData, deploymentData models.DeploymentData) error {
-	_, cancel := context.WithTimeout(ctx, consts.TimeOut*time.Second)
-	defer cancel()
-
+func (hr HashRepository) SaveHashData(allHashData []api.HashData, deploymentData *models.DeploymentData) error {
 	tx, err := hr.db.Begin()
 	if err != nil {
 		hr.logger.Error("err while saving data in database ", err)
@@ -58,10 +50,7 @@ func (hr HashRepository) SaveHashData(ctx context.Context, allHashData []api.Has
 }
 
 // GetHashData retrieves data from the database using the path and algorithm
-func (hr HashRepository) GetHashData(ctx context.Context, dirFiles, algorithm string, deploymentData models.DeploymentData) ([]models.HashDataFromDB, error) {
-	_, cancel := context.WithTimeout(ctx, consts.TimeOut*time.Second)
-	defer cancel()
-
+func (hr HashRepository) GetHashData(dirFiles, algorithm string, deploymentData *models.DeploymentData) ([]models.HashDataFromDB, error) {
 	var allHashDataFromDB []models.HashDataFromDB
 
 	query := fmt.Sprintf("SELECT id,file_name,full_file_path,hash_sum,algorithm,image_tag,name_pod,name_deployment FROM %s WHERE full_file_path LIKE $1 and algorithm=$2 and name_pod=$3", os.Getenv("TABLE_NAME"))

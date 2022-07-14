@@ -27,47 +27,52 @@ func NewKuberService(logger *logrus.Logger) *KuberService {
 	}
 }
 
-func (ks *KuberService) GetDataFromK8sAPI() (models.KuberData, models.DeploymentData, models.ConfigMapData, error) {
+func (ks *KuberService) GetDataFromK8sAPI() (*models.DataFromK8sAPI, error) {
 	kuberData, err := ks.ConnectionToK8sAPI()
 	if err != nil {
 		ks.logger.Error("can't connection to K8sAPI: %s", err)
-		return models.KuberData{}, models.DeploymentData{}, models.ConfigMapData{}, err
+		return nil, err
 	}
 	deploymentData, err := ks.GetDataFromDeployment(kuberData)
 	if err != nil {
 		ks.logger.Error("error get data from kuberAPI %s", err)
-		return models.KuberData{}, models.DeploymentData{}, models.ConfigMapData{}, err
+		return nil, err
 	}
 
 	configData, err := ks.GetDataFromConfigMap(kuberData, deploymentData.LabelMainProcessName)
 	if err != nil {
 		ks.logger.Error("err while getting data from configMap K8sAPI %s", err)
-		return models.KuberData{}, models.DeploymentData{}, models.ConfigMapData{}, err
+		return &models.DataFromK8sAPI{}, err
 	}
 
-	return kuberData, deploymentData, configData, nil
+	dataFromK8sAPI := &models.DataFromK8sAPI{
+		KuberData:      kuberData,
+		DeploymentData: deploymentData,
+		ConfigMapData:  configData,
+	}
+
+	return dataFromK8sAPI, nil
 }
 
-func (ks *KuberService) ConnectionToK8sAPI() (models.KuberData, error) {
-	// Connect to Kubernetes API
+func (ks *KuberService) ConnectionToK8sAPI() (*models.KuberData, error) {
 	ks.logger.Info("### 🌀 Attempting to use in cluster config")
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		ks.logger.Error(err)
-		return models.KuberData{}, err
+		return nil, err
 	}
 
 	ks.logger.Info("### 💻 Connecting to Kubernetes API, using host: ", config.Host)
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		ks.logger.Error(err)
-		return models.KuberData{}, err
+		return nil, err
 	}
 
 	namespaceBytes, err := ioutil.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
 	if err != nil {
 		ks.logger.Error(err)
-		return models.KuberData{}, err
+		return nil, err
 	}
 	namespace := string(namespaceBytes)
 
@@ -82,7 +87,7 @@ func (ks *KuberService) ConnectionToK8sAPI() (models.KuberData, error) {
 		ks.logger.Fatalln("### 💥 Env var DEPLOYMENT_NAME was not set")
 	}
 	targetType := os.Getenv("DEPLOYMENT_TYPE")
-	kuberData := models.KuberData{
+	kuberData := &models.KuberData{
 		Clientset:  clientset,
 		Namespace:  namespace,
 		TargetName: targetName,
@@ -90,11 +95,11 @@ func (ks *KuberService) ConnectionToK8sAPI() (models.KuberData, error) {
 	}
 	return kuberData, nil
 }
-func (ks *KuberService) GetDataFromConfigMap(kuberData models.KuberData, label string) (models.ConfigMapData, error) {
+func (ks *KuberService) GetDataFromConfigMap(kuberData *models.KuberData, label string) (*models.ConfigMapData, error) {
 	cm, err := kuberData.Clientset.CoreV1().ConfigMaps(kuberData.Namespace).Get(context.Background(), "hasher-config", metav1.GetOptions{})
 	if err != nil {
 		ks.logger.Error("err while getting data from configMap kuberAPI ", err)
-		return models.ConfigMapData{}, err
+		return nil, err
 	}
 
 	var configMapData models.ConfigMapData
@@ -116,14 +121,14 @@ func (ks *KuberService) GetDataFromConfigMap(kuberData models.KuberData, label s
 		configMapData.MountPath = value
 	}
 
-	return configMapData, err
+	return &configMapData, err
 }
 
-func (ks *KuberService) GetDataFromDeployment(kuberData models.KuberData) (models.DeploymentData, error) {
+func (ks *KuberService) GetDataFromDeployment(kuberData *models.KuberData) (*models.DeploymentData, error) {
 	allDeploymentData, err := kuberData.Clientset.AppsV1().Deployments(kuberData.Namespace).Get(context.Background(), kuberData.TargetName, metav1.GetOptions{})
 	if err != nil {
 		ks.logger.Error("err while getting data from kuberAPI ", err)
-		return models.DeploymentData{}, err
+		return nil, err
 	}
 
 	deploymentData := models.DeploymentData{}
@@ -141,10 +146,10 @@ func (ks *KuberService) GetDataFromDeployment(kuberData models.KuberData) (model
 		}
 	}
 
-	return deploymentData, nil
+	return &deploymentData, nil
 }
 
-func (ks *KuberService) RolloutDeployment(kuberData models.KuberData) error {
+func (ks *KuberService) RolloutDeployment(kuberData *models.KuberData) error {
 	patchData := fmt.Sprintf(`{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt":"%s"}}}}}`, time.Now().Format(time.RFC3339))
 	_, err := kuberData.Clientset.AppsV1().Deployments(kuberData.Namespace).Patch(context.Background(), kuberData.TargetName, types.StrategicMergePatchType, []byte(patchData), metav1.PatchOptions{FieldManager: "kubectl-rollout"})
 

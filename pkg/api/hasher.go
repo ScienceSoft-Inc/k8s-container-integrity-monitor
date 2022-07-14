@@ -3,19 +3,13 @@ package api
 import (
 	"context"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
-	"time"
-
-	"github.com/k8s-container-integrity-monitor/internal/core/consts"
-
-	"github.com/sirupsen/logrus"
 )
 
 // SearchFilePath searches for all files in the given directory
-func SearchFilePath(ctx context.Context, commonPath string, jobs chan<- string, logger *logrus.Logger) {
-	_, cancel := context.WithTimeout(ctx, consts.TimeOut*time.Second)
-	defer cancel()
+func SearchFilePath(commonPath string, jobs chan<- string, logger *logrus.Logger) {
 	err := filepath.Walk(commonPath, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
 			jobs <- path
