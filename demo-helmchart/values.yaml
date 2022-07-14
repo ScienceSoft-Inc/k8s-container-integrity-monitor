@@ -1,13 +1,23 @@
+# This file is intended
+# for configuring a test pod
+# to demonstrate the working of the application.
+# Here you can see an example of running a pod with a nginx container
+
+# Container Image Variables
 container:
-  name: nginx
-  image: nginx:latest
+  name: nginx # Container name
+  image: nginx:latest # Container image that you deploy to the cluster
 
+# Name and identifier variables
 metadata:
-  deploymentName: nginx-hasher-webhook
-  appName: nginx-app
+  deploymentName: nginx-hasher-webhook # Set the unique name for deployment schema
+  appName: nginx-app # Application name label
 
-serviceAccount: hasher
+# Name of Container Monitor App service account
+serviceAccount: hasher # Use the same service account as in the configuration of Mutating Injector App
 
+# Number of replicas
 replicaCount: 1
 
+# Container process name
 processName: nginx
