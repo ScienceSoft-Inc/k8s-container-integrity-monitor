@@ -13,18 +13,11 @@ import (
 )
 
 func Initialize(ctx context.Context, logger *logrus.Logger, sig chan os.Signal) {
-	// Initialize database
-	logger.Info("Starting database connection")
-	db, err := repositories.InitializeDB(logger)
-	if err != nil {
-		logger.Fatalf("failed to connection to database %s", err)
-	}
-
 	// Initialize repository
-	repository := repositories.NewAppRepository(db, logger)
+	repository := repositories.NewAppRepository(logger)
 
 	// Initialize service
-	algorithm := os.Getenv("AlGORITHM")
+	algorithm := os.Getenv("ALGORITHM")
 
 	service, err := services.NewAppService(repository, algorithm, logger)
 	if err != nil {
@@ -46,7 +39,7 @@ func Initialize(ctx context.Context, logger *logrus.Logger, sig chan os.Signal) 
 		logger.Fatalf("proc with name %s not exist", dataFromK8sAPI.ConfigMapData.ProcName)
 	}
 
-	//Getting current directory path
+	//Getting the path to the monitoring directory
 	dirPath := "../proc/" + strconv.Itoa(pid) + "/root/" + dataFromK8sAPI.ConfigMapData.MountPath
 
 	duration, err := strconv.Atoi(os.Getenv("DURATION_TIME"))

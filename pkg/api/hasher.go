@@ -30,8 +30,8 @@ func SearchFilePath(commonPath string, jobs chan<- string, logger *logrus.Logger
 }
 
 // Result launching an infinite loop of receiving and outputting to Stdout the result and signal control
-func Result(ctx context.Context, results chan HashData, c chan os.Signal) []HashData {
-	var allHashData []HashData
+func Result(ctx context.Context, results chan *HashData, c chan os.Signal) []*HashData {
+	var allHashData []*HashData
 	for {
 		select {
 		case hashData, ok := <-results:
@@ -41,7 +41,7 @@ func Result(ctx context.Context, results chan HashData, c chan os.Signal) []Hash
 			allHashData = append(allHashData, hashData)
 		case <-c:
 			fmt.Println("exit program")
-			return []HashData{}
+			return []*HashData{}
 		case <-ctx.Done():
 		}
 	}

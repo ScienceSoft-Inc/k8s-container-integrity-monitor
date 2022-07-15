@@ -12,7 +12,7 @@ type IAppRepository interface {
 }
 
 type IHashRepository interface {
-	SaveHashData(allHashData []api.HashData, deploymentData *models.DeploymentData) error
-	GetHashData(dirFiles string, algorithm string, deploymentData *models.DeploymentData) ([]models.HashDataFromDB, error)
+	SaveHashData(allHashData []*api.HashData, deploymentData *models.DeploymentData) error
+	GetHashData(dirFiles string, algorithm string, deploymentData *models.DeploymentData) ([]*models.HashDataFromDB, error)
 	DeleteFromTable(nameDeployment string) error
 }

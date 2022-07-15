@@ -13,19 +13,19 @@ import (
 type IAppService interface {
 	GetPID(configData *models.ConfigMapData) (int, error)
 	IsExistDeploymentNameInDB(deploymentName string) bool
-	LaunchHasher(ctx context.Context, dirPath string, sig chan os.Signal) []api.HashData
+	LaunchHasher(ctx context.Context, dirPath string, sig chan os.Signal) []*api.HashData
 	Start(ctx context.Context, dirPath string, sig chan os.Signal, deploymentData *models.DeploymentData) error
 	Check(ctx context.Context, dirPath string, sig chan os.Signal, deploymentData *models.DeploymentData, kuberData *models.KuberData) error
 }
 
 type IHashService interface {
-	SaveHashData(allHashData []api.HashData, deploymentData *models.DeploymentData) error
-	GetHashData(dirPath string, deploymentData *models.DeploymentData) ([]models.HashDataFromDB, error)
+	SaveHashData(allHashData []*api.HashData, deploymentData *models.DeploymentData) error
+	GetHashData(dirPath string, deploymentData *models.DeploymentData) ([]*models.HashDataFromDB, error)
 	DeleteFromTable(nameDeployment string) error
-	IsDataChanged(currentHashData []api.HashData, hashSumFromDB []models.HashDataFromDB, deploymentData *models.DeploymentData) (bool, error)
-	CreateHash(path string) (api.HashData, error)
-	WorkerPool(ctx context.Context, jobs chan string, results chan api.HashData)
-	Worker(ctx context.Context, wg *sync.WaitGroup, jobs <-chan string, results chan<- api.HashData)
+	IsDataChanged(currentHashData []*api.HashData, hashSumFromDB []*models.HashDataFromDB, deploymentData *models.DeploymentData) (bool, error)
+	CreateHash(path string) (*api.HashData, error)
+	WorkerPool(jobs chan string, results chan *api.HashData)
+	Worker(wg *sync.WaitGroup, jobs <-chan string, results chan<- *api.HashData)
 }
 
 type IKuberService interface {

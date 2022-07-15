@@ -87,10 +87,10 @@ func (as *AppService) GetPID(configData *models.ConfigMapData) (int, error) {
 }
 
 //LaunchHasher takes a path to a directory and returns HashData
-func (as *AppService) LaunchHasher(ctx context.Context, dirPath string, sig chan os.Signal) []api.HashData {
+func (as *AppService) LaunchHasher(ctx context.Context, dirPath string, sig chan os.Signal) []*api.HashData {
 	jobs := make(chan string)
-	results := make(chan api.HashData)
-	go as.IHashService.WorkerPool(ctx, jobs, results)
+	results := make(chan *api.HashData)
+	go as.IHashService.WorkerPool(jobs, results)
 	go api.SearchFilePath(dirPath, jobs, as.logger)
 	allHashData := api.Result(ctx, results, sig)
 

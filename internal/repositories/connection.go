@@ -10,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func InitializeDB(logger *logrus.Logger) (*sql.DB, error) {
+func ConnectionToDB(logger *logrus.Logger) (*sql.DB, error) {
 	connectionDB := models.ConnectionDB{
 		Dbdriver:   os.Getenv("DB_DRIVER"),
 		DbUser:     os.Getenv("DB_USER"),

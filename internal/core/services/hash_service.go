@@ -1,16 +1,13 @@
 package services
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strconv"
 	"sync"
-	"time"
 
-	"github.com/k8s-container-integrity-monitor/internal/core/consts"
 	"github.com/k8s-container-integrity-monitor/internal/core/models"
 	"github.com/k8s-container-integrity-monitor/internal/core/ports"
 	"github.com/k8s-container-integrity-monitor/pkg/api"
@@ -41,10 +38,7 @@ func NewHashService(hashRepository ports.IHashRepository, alg string, logger *lo
 }
 
 // WorkerPool launches a certain number of workers for concurrent processing
-func (hs HashService) WorkerPool(ctx context.Context, jobs chan string, results chan api.HashData) {
-	ctx, cancel := context.WithTimeout(ctx, consts.DefaultContextTimeOut*time.Second)
-	defer cancel()
-
+func (hs HashService) WorkerPool(jobs chan string, results chan *api.HashData) {
 	countWorkers, err := strconv.Atoi(os.Getenv("COUNT_WORKERS"))
 	if err != nil {
 		countWorkers = runtime.NumCPU()
@@ -53,16 +47,14 @@ func (hs HashService) WorkerPool(ctx context.Context, jobs chan string, results 
 	var wg sync.WaitGroup
 	for w := 1; w <= countWorkers; w++ {
 		wg.Add(1)
-		go hs.Worker(ctx, &wg, jobs, results)
+		go hs.Worker(&wg, jobs, results)
 	}
 	defer close(results)
 	wg.Wait()
 }
 
 // Worker gets jobs from a pipe and writes the result to stdout and database
-func (hs HashService) Worker(ctx context.Context, wg *sync.WaitGroup, jobs <-chan string, results chan<- api.HashData) {
-	_, cancel := context.WithTimeout(ctx, consts.DefaultContextTimeOut*time.Second)
-	defer cancel()
+func (hs HashService) Worker(wg *sync.WaitGroup, jobs <-chan string, results chan<- *api.HashData) {
 	defer wg.Done()
 	for j := range jobs {
 		data, err := hs.CreateHash(j)
@@ -76,11 +68,11 @@ func (hs HashService) Worker(ctx context.Context, wg *sync.WaitGroup, jobs <-cha
 }
 
 // CreateHash creates a new object with a hash sum
-func (hs HashService) CreateHash(path string) (api.HashData, error) {
+func (hs HashService) CreateHash(path string) (*api.HashData, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		hs.logger.Error("not exist file path ", err)
-		return api.HashData{}, err
+		return nil, err
 	}
 	defer file.Close()
 
@@ -88,17 +80,17 @@ func (hs HashService) CreateHash(path string) (api.HashData, error) {
 	res, err := hs.hasher.Hash(file)
 	if err != nil {
 		hs.logger.Error("not got hash sum ", err)
-		return api.HashData{}, err
+		return nil, err
 	}
 	outputHashSum.Hash = res
 	outputHashSum.FileName = filepath.Base(path)
 	outputHashSum.FullFilePath = path
 	outputHashSum.Algorithm = hs.alg
-	return outputHashSum, nil
+	return &outputHashSum, nil
 }
 
 // SaveHashData accesses the repository to save data to the database
-func (hs HashService) SaveHashData(allHashData []api.HashData, deploymentData *models.DeploymentData) error {
+func (hs HashService) SaveHashData(allHashData []*api.HashData, deploymentData *models.DeploymentData) error {
 	err := hs.hashRepository.SaveHashData(allHashData, deploymentData)
 	if err != nil {
 		hs.logger.Error("error while saving data to database", err)
@@ -108,7 +100,7 @@ func (hs HashService) SaveHashData(allHashData []api.HashData, deploymentData *m
 }
 
 // GetHashData accesses the repository to get data from the database
-func (hs HashService) GetHashData(dirFiles string, deploymentData *models.DeploymentData) ([]models.HashDataFromDB, error) {
+func (hs HashService) GetHashData(dirFiles string, deploymentData *models.DeploymentData) ([]*models.HashDataFromDB, error) {
 	hash, err := hs.hashRepository.GetHashData(dirFiles, hs.alg, deploymentData)
 	if err != nil {
 		hs.logger.Error("hash service didn't get hash sum", err)
@@ -128,7 +120,7 @@ func (hs HashService) DeleteFromTable(nameDeployment string) error {
 }
 
 // IsDataChanged checks if the current data has changed with the data stored in the database
-func (hs HashService) IsDataChanged(currentHashData []api.HashData, hashDataFromDB []models.HashDataFromDB, deploymentData *models.DeploymentData) (bool, error) {
+func (hs HashService) IsDataChanged(currentHashData []*api.HashData, hashDataFromDB []*models.HashDataFromDB, deploymentData *models.DeploymentData) (bool, error) {
 	isDataChanged := wasDataChanged(hashDataFromDB, currentHashData, deploymentData)
 	isAddedFiles := wasAddedFiles(currentHashData, hashDataFromDB)
 
@@ -138,7 +130,7 @@ func (hs HashService) IsDataChanged(currentHashData []api.HashData, hashDataFrom
 	return false, nil
 }
 
-func wasDataChanged(hashSumFromDB []models.HashDataFromDB, currentHashData []api.HashData, deploymentData *models.DeploymentData) bool {
+func wasDataChanged(hashSumFromDB []*models.HashDataFromDB, currentHashData []*api.HashData, deploymentData *models.DeploymentData) bool {
 	for _, dataFromDB := range hashSumFromDB {
 		trigger := false
 		for _, dataCurrent := range currentHashData {
@@ -166,7 +158,7 @@ func wasDataChanged(hashSumFromDB []models.HashDataFromDB, currentHashData []api
 	return false
 }
 
-func wasAddedFiles(currentHashData []api.HashData, hashDataFromDB []models.HashDataFromDB) bool {
+func wasAddedFiles(currentHashData []*api.HashData, hashDataFromDB []*models.HashDataFromDB) bool {
 	dataFromDB := make(map[string]struct{}, len(hashDataFromDB))
 	for _, value := range hashDataFromDB {
 		dataFromDB[value.FullFilePath] = struct{}{}
