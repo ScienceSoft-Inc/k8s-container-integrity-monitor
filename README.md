@@ -50,13 +50,13 @@ To work properly, you first need to set the configuration files:
 ## :hammer: Installing components
 
 ### Installation DATABASE
-Apply all annotations in directory "manifests/db/..":
+Apply all annotations in directory "manifests/database/..":
 ```
-kubectl apply -f manifests/db/postgres-db-pv.yaml
-kubectl apply -f manifests/db/postgres-db-pvc.yaml
-kubectl apply -f manifests/db/postgres-secret.yaml
-kubectl apply -f manifests/db/postgres-db-deployment.yaml
-kubectl apply -f manifests/db/postgres-db-service.yaml
+kubectl apply -f manifests/database/postgres-db-pv.yaml
+kubectl apply -f manifests/database/postgres-db-pvc.yaml
+kubectl apply -f manifests/database/postgres-secret.yaml
+kubectl apply -f manifests/database/postgres-db-deployment.yaml
+kubectl apply -f manifests/database/postgres-db-service.yaml
 ```
 
 ### Installation WEBHOOK
@@ -78,6 +78,7 @@ cfssl gencert \
 
 Move your SSL key and certificate to the ssl directory:
 ```
+mkdir webhook/ssl
 mv /tmp/k8s-webhook-injector.pem ./webhook/ssl/k8s-webhook-injector.pem
 mv /tmp/k8s-webhook-injector-key.pem ./webhook/ssl/k8s-webhook-injector.key
 ```
