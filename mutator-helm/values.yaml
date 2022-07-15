@@ -1,39 +1,39 @@
 # Default values for mutator helm
-appName: k8s-webhook-injector
+appName: k8s-webhook-injector # application name
 mountPath: /ssl
 
 # Values for mutator-deployment
 
-namespaceDep: default
+namespaceDep: default # namespace of cluster
 
-contName: k8s-webhook-injector-ws
-image: dyslexicat/tcpdump-webhook
-pullPolicy: Never
+contName: k8s-webhook-injector-ws # name of the container
+image: dyslexicat/tcpdump-webhook # image name
+pullPolicy: Never # pull policy for image
 
-containerPort: 8443
+containerPort: 8443 # port for the container
 
-replicaCount: 1
+replicaCount: 1 # number of replicas
 
 # Values for mutator-ConfigMap
 
-confName: ssl-k8s-webhook-injector
+confName: ssl-k8s-webhook-injector # configuration name
 
-namespaceMap: default
+namespaceMap: default # namespace of cluster
 
-serverCrt: "your certificate"
-serverKey: "your key"
+serverCrt: "your certificate" # ssl key
+serverKey: "your key" # ssl certificate
 
 # Values for mutator-configuration
 
-namespaceConf: default
+namespaceConf: default # namespace of cluster
 
-caBundle: "your CA certificate"
+caBundle: "your CA certificate" # caBundle value
 
 path: "/mutate"
 
 # Values for mutator-service
 
-namespaceService: default
+namespaceService: default # namespace of cluster
 
-port: 443
-targetPort: 8443
+port: 443 # port of this service
+targetPort: 8443 # port to accept traffic on
