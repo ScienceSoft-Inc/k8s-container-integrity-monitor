@@ -1,0 +1,8 @@
+apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: hasher-config
+  data:
+    {{ .Values.container.name }}: |
+      PID_NAME={{ .Values.configMap.processName }}
+      MOUNT_PATH={{ .Values.configMap.mountPath }}

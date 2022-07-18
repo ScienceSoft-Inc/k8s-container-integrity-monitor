@@ -3,7 +3,7 @@
 # to demonstrate the working of the application.
 # Here you can see an example of running a pod with a nginx container
 
-# Container Image Variables
+# Container image variables
 container:
   name: nginx # Container name
   image: nginx:latest # Container image that you deploy to the cluster
@@ -14,10 +14,12 @@ metadata:
   appName: nginx-app # Application name label
 
 # Name of Container Monitor App service account
-serviceAccount: hasher # Use the same service account as in the configuration of Mutating Injector App
+serviceAccount: hasher # Service account name
 
 # Number of replicas
 replicaCount: 1
 
-# Container process name
-processName: nginx
+# Configuration file variables
+configMap:
+  processName: nginx # Container process name
+  mountPath: etc/nginx # Tracked folder path
