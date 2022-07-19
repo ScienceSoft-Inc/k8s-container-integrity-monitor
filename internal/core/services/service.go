@@ -141,6 +141,10 @@ func (as *AppService) Check(ctx context.Context, dirPath string, sig chan os.Sig
 		}
 
 		err = as.IKuberService.RolloutDeployment(kuberData)
+		if err != nil {
+			as.logger.Error("Error while rolling out deployment in k8s", err)
+			return err
+		}
 	}
 	return nil
 }

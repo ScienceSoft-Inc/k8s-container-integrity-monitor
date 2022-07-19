@@ -152,7 +152,6 @@ func (ks *KuberService) GetDataFromDeployment(kuberData *models.KuberData) (*mod
 func (ks *KuberService) RolloutDeployment(kuberData *models.KuberData) error {
 	patchData := fmt.Sprintf(`{"spec":{"template":{"metadata":{"annotations":{"kubectl.kubernetes.io/restartedAt":"%s"}}}}}`, time.Now().Format(time.RFC3339))
 	_, err := kuberData.Clientset.AppsV1().Deployments(kuberData.Namespace).Patch(context.Background(), kuberData.TargetName, types.StrategicMergePatchType, []byte(patchData), metav1.PatchOptions{FieldManager: "kubectl-rollout"})
-
 	if err != nil {
 		ks.logger.Printf("### 👎 Warning: Failed to patch %v, restart failed: %v", kuberData.TargetType, err)
 		return err

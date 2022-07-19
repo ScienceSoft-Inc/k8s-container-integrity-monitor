@@ -45,29 +45,18 @@ func (f *formatter) Format(entry *logrus.Entry) ([]byte, error) {
 		newLine = "\r\n"
 	}
 
-	sb.WriteString(strings.ToUpper(entry.Level.String()))
-	sb.WriteString(" ")
-	sb.WriteString(entry.Time.Format(time.RFC3339))
-	sb.WriteString(" ")
-	sb.WriteString(f.prefix)
-	sb.WriteString(" ")
-	sb.WriteString(entry.Message)
-	sb.WriteString(" ")
+	sb.WriteString(strings.ToUpper(entry.Level.String()) + " " + entry.Time.Format(time.RFC3339) + " " + f.prefix + " " + entry.Message + " ")
 	file, ok := entry.Data["file"].(string)
 	if ok {
-		sb.WriteString("file:")
-		sb.WriteString(file)
+		sb.WriteString("file:" + file)
 	}
 	line, ok := entry.Data["line"].(int)
 	if ok {
-		sb.WriteString(":")
-		sb.WriteString(strconv.Itoa(line))
+		sb.WriteString(":" + strconv.Itoa(line))
 	}
 	function, ok := entry.Data["function"].(string)
 	if ok {
-		sb.WriteString(" ")
-		sb.WriteString("func:")
-		sb.WriteString(function)
+		sb.WriteString(" " + "func:" + function)
 	}
 	sb.WriteString(newLine)
 
