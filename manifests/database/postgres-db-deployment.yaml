@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment                                # Type of the kubernetes resource
+metadata:
+  name: hasher-database                    # Name of the deployment
+  labels:                                        # Labels applied to this deployment 
+    app: kuber-hasher
+spec:
+  selector:
+    matchLabels:                                  # This deployment applies to the Pods matching the specified labels
+      app: kuber-hasher
+      tier: postgres
+  replicas: 1
+  template:                                       # Template for the Pods in this deployment
+    metadata:
+      labels:                                     # Labels to be applied to the Pods in this deployment
+        app: kuber-hasher
+        tier: postgres
+    spec:                                         # The spec for the containers that will be run inside the Pods in this deployment
+      containers:
+        - name: postgres
+          image: postgres:latest                 # The container image
+          imagePullPolicy: "IfNotPresent"
+          lifecycle:
+            postStart:
+              exec:
+                command: [ "/bin/sh","-c","sleep 20 && PGPASSWORD=$POSTGRES_PASSWORD psql -w -d $POSTGRES_DB -U $POSTGRES_USER -c '
+                CREATE TABLE IF NOT EXISTS hashfiles 
+                ( 
+                id                BIGSERIAL PRIMARY KEY,
+                file_name         VARCHAR NOT NULL,
+                full_file_path    TEXT    NOT NULL,
+                algorithm         VARCHAR NOT NULL,
+                hash_sum          VARCHAR NOT NULL,
+                name_deployment   TEXT,
+                name_pod          TEXT,
+                time_of_creation  VARCHAR (50),
+                image_tag         TEXT,
+                CONSTRAINT files_unique UNIQUE (full_file_path, algorithm)
+                );'" ]
+          envFrom:                                # Get the environmental variables from a secret file whose name is "postgres-secret"
+            - secretRef:
+                name: hasher-database-secret
+          ports:
+            - containerPort: 5432                   # The port that the container exposes 
+              name: postgres
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgres-persistent-storage     # This name should match the name specified in `volumes.name`
+          resources:
+            limits:
+              cpu: "1"
+              memory: "512Mi"
+          livenessProbe:
+            exec:
+              command: [ "/bin/sh","-c","sleep 5 && PGPASSWORD=$POSTGRES_PASSWORD psql -w -d $POSTGRES_DB -U $POSTGRES_USER -c 'SELECT * from hashfiles;'" ]
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            failureThreshold: 1
+            successThreshold: 1
+            timeoutSeconds: 20
+      volumes:                                      # A PersistentVolume is mounted as a volume to the Pod
+        - name: postgres-persistent-storage
+          persistentVolumeClaim:
+            claimName: hasher-postgres-pvc
+
+
+

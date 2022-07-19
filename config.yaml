@@ -1,0 +1,4 @@
+#Logger credentials
+logger:
+  level: 5
+  logfile:

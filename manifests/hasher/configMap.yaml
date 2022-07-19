@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hasher-config
+data:
+  nginx: |
+    PID_NAME=nginx
+    MOUNT_PATH=etc/nginx
+  php: |
+    PID_NAME=php
+    MOUNT_PATH=etc/debconf.conf
+  alpine: |
+    PID_NAME=alpine
+    MOUNT_PATH=etc/
+  redis: |
+    PID_NAME=redis
+    MOUNT_PATH=etc/udhcpd.conf
+  mysql: |
+    PID_NAME=mysql
+    MOUNT_PATH=etc/my.cnf
