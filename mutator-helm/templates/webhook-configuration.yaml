@@ -1,0 +1,21 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: {{ .Values.appName }}
+webhooks:
+  - name: k8s-webhook-injector.default.svc.cluster.local
+    failurePolicy: Fail
+    clientConfig:
+      service:
+        name: {{ .Values.appName }}
+        namespace: {{ .Values.namespaceConf }}
+        path: {{ .Values.path }}
+      caBundle: {{ .Values.caBundle }}
+    rules:
+      - operations: [ "CREATE" ]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+    admissionReviewVersions: ["v1", "v1beta1"]
+    sideEffects: None
+    timeoutSeconds: 5
