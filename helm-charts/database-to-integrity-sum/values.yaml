@@ -1,7 +1,9 @@
-# dependency with database "postgresql"
+# Dependency to database "postgresql"
+secretName: secret-database-to-integrety-sum # Set the unique name for secret for database
+
 postgresql:
   auth:
-    # Authentication data to connect to the database
+    # Authentication data to connect to the database, need to set
     postgresPassword: ""
     username: ""
     password: ""
@@ -38,11 +40,17 @@ postgresql:
     containerSecurityContext:
       enabled: false
       runAsUser: "auto"
+    service:
+      ## PosgresSQL service type
+      type: ClusterIP
+      # clusterIP: None
+      port: 5432
 
     persistence:
       # Enable PostgreSQL Primary data persistence using PVC
       enabled: true
       existingClaim: ""
+      # mountPath: /bitnami/postgresql - default mountPath
       accessModes:
         - ReadWriteMany
       size: 5Gi
@@ -61,38 +69,4 @@ postgresql:
       enabled: false
       securityContext:
         runAsUser: "auto"
-
-
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: true
-  # Annotations to add to the service account
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""
-
-service:
-  type: ClusterIP
-  port: 80
-
-# Controls external access to services in the cluster
-ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-  hosts:
-    - host: chart-example.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls: []
-
-# Allows for automatic scaling of Kubernetes worker nodes based on resource utilization
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-
 
