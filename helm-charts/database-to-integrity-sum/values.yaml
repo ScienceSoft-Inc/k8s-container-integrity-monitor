@@ -69,4 +69,3 @@ postgresql:
       enabled: false
       securityContext:
         runAsUser: "auto"
-
