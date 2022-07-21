@@ -27,13 +27,13 @@ k8s-container-integrity-monitor injects a `hasher-webhook-injector-sidecar` to y
 
 ## Architecture
 ### Component diagram
-![Alt text](/docs/diagrams/projectStructure.png?raw=true "Component diagram")
+![File location: docs/diagrams/projectStructure.png](/docs/diagrams/projectStructure.png?raw=true "Component diagram")
 ### Activity diagram
-![Alt text](/docs/diagrams/deployDiagram.png?raw=true "Activity diagram") <br>
+![File location: docs/diagrams/deployDiagram.png](/docs/diagrams/deployDiagram.png?raw=true "Activity diagram") 
 ### Statechart diagram
-![Alt text](/docs/diagrams/appStatechartDiagram.png?raw=true "Statechart diagram") <br>
+![File location: docs/diagrams/appStatechartDiagram.png](/docs/diagrams/appStatechartDiagram.png?raw=true "Statechart diagram")
 ### Sequence diagram
-![Alt text](/docs/diagrams/appSequenceDiagram.png?raw=true "Sequence diagram") <br>
+![File location: docs/diagrams/appSequenceDiagram.png](/docs/diagrams/appSequenceDiagram.png?raw=true "Sequence diagram") 
 ## Getting Started
 
 ### Clone repository and install dependencies
