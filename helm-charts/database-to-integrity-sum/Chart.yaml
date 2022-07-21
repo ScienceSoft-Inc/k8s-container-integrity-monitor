@@ -1,0 +1,12 @@
+apiVersion: v2
+name: Database-HelmChart
+description: Helm Chart for database to integrity sum
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+
+dependencies:
+  # dependency with database "postgresql"
+  - name: postgresql
+    version: 11.1.28
+    repository: https://charts.bitnami.com/bitnami
