@@ -48,95 +48,40 @@ If you do not already have a cluster, you can create one by using `minikube`.
 Example https://minikube.sigs.k8s.io/docs/start/
 
 ### Configuration
-To work properly, you first need to set the configuration files:
-+ environmental variables in the `.env` file
-+ config in file `manifests/hasher/configMap.yaml`
-+ secret for database `manifests/database/postgres-secret.yaml`
-
 
 ## :hammer: Installing components
+```
+docker build -t mutator ./k8s-container-integrity-mutator
+helm intall mutator
 
-### Installation DATABASE
-Apply all annotations in directory "manifests/database/..":
-```
-kubectl apply -f manifests/database/postgres-db-pv.yaml
-kubectl apply -f manifests/database/postgres-db-pvc.yaml
-kubectl apply -f manifests/database/postgres-secret.yaml
-kubectl apply -f manifests/database/postgres-db-deployment.yaml
-kubectl apply -f manifests/database/postgres-db-service.yaml
-```
+make integrity sum
 
-### Installation WEBHOOK
-Generate CA in /tmp :
+helm install demo-apps-to-monitor
 ```
-cfssl gencert -initca ./webhook/tls/ca-csr.json | cfssljson -bare /tmp/ca
-```
+### Install Helm
+Before using helm charts you need to install helm on your local machine.  
+You can find the necessary installation information at this link https://helm.sh/docs/intro/install/
 
-Generate private key and certificate for SSL connection:
+Then update the on-disk dependencies to mirror Chart.yaml.
 ```
-cfssl gencert \
--ca=/tmp/ca.pem \
--ca-key=/tmp/ca-key.pem \
--config=./webhook/tls/ca-config.json \
--hostname="k8s-webhook-injector,k8s-webhook-injector.default.svc.cluster.local,k8s-webhook-injector.default.svc,localhost,127.0.0.1" \
--profile=default \
-./webhook/tls/ca-csr.json | cfssljson -bare /tmp/k8s-webhook-injector
+helm dependency update helm-charts/database-to-integrity-sum
 ```
-
-Move your SSL key and certificate to the ssl directory:
+INSERT TEXT HERE
 ```
-mkdir webhook/ssl
-mv /tmp/k8s-webhook-injector.pem ./webhook/ssl/k8s-webhook-injector.pem
-mv /tmp/k8s-webhook-injector-key.pem ./webhook/ssl/k8s-webhook-injector.key
+helm install helm-charts/database-to-integrity-sum
 ```
-
-Update configuration data in the manifests/webhook/webhook-configMap.yaml file with your key in the appropriate field `data:server.key` and certificate in the appropriate field `data:server.crt:`:
+INSERT TEXT HERE
 ```
-cat ./webhook/ssl/k8s-webhook-injector.key | base64 | tr -d '\n'
-cat ./webhook/ssl/k8s-webhook-injector.pem | base64 | tr -d '\n'
+helm install db helm-charts/mutator
 ```
-
-Update field `caBundle` value in the manifests/webhook/webhook-configuration.yaml file with your base64 encoded CA certificate:
+INSERT TEXT HERE
 ```
-cat /tmp/ca.pem | base64 | tr -d '\n'
+helm install app helm-charts/demo-apps-to-monitor
 ```
 
 ## Quick start
-Build docker images webhook and hasher:
-```
-eval $(minikube docker-env)
-docker build -t webhook -f webhook/Dockerfile .
-docker build -t hasher .
-```
-Apply webhook annotation:
-```
-kubectl apply -f manifests/webhook/webhook-configMap.yaml
-kubectl apply -f manifests/webhook/webhook-deployment.yaml
-kubectl apply -f manifests/webhook/webhook-service.yaml
-kubectl apply -f manifests/webhook/webhook-configuration.yaml
-```
-Apply hasher annotation:
-```
-kubectl apply -f manifests/hasher/service-account-hasher.yaml
-kubectl apply -f manifests/hasher/configMap.yaml
-```
-
-See examples in manifests/hasher directory for how to add the `hasher-webhook` sidecar-container to any pod, and the service account needed.
-For example there is manifests/hasher/test-nginx-deploy.yaml DEPLOYMENT files:
-```
-kubectl apply -f manifests/hasher/test-nginx-deploy.yaml
-```
-
-##Pay attention!
-If you want to use a hasher-webhook-injector-sidecar, then you need to specify the following data in your deployment:
-+ `spec:template:metadata:labels:hasher-webhook-injector-sidecar: "true"`
-+ `hasher-webhook-process-name: "your main process name"`
 
 ## Troubleshooting
-Sometimes you may find that pod is injected with sidecar container as expected, check the following items:
-
-1) The pod is in running state with `hasher-sidecar` sidecar container injected and no error logs.
-2) Check if the application pod has he correct labels `hasher-webhook-injector-sidecar: "true"` and installed `hasher-webhook-process-name`.
 ___________________________
 ### :notebook_with_decorative_cover: Godoc extracts and generates documentation for Go programs
 #### Presents the documentation as a web page.
@@ -160,11 +105,6 @@ for example
 ```go
 cd ../pkg/api
 go test -v
-```
-
-### :mag: Running linter "golangci-lint"
-```
-golangci-lint run
 ```
 
 ##License
