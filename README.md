@@ -66,15 +66,15 @@ Then update the on-disk dependencies to mirror Chart.yaml.
 ```
 helm dependency update helm-charts/database-to-integrity-sum
 ```
-INSERT TEXT HERE
+Then install the database helm-chart on your cluster.
 ```
-helm install helm-charts/database-to-integrity-sum
+helm install db helm-charts/database-to-integrity-sum
 ```
-INSERT TEXT HERE
+And also install the mutating injector app.
 ```
-helm install db helm-charts/mutator
+helm install mutator helm-charts/mutator
 ```
-INSERT TEXT HERE
+For a demonstration of work, use demo-app.
 ```
 helm install app helm-charts/demo-apps-to-monitor
 ```

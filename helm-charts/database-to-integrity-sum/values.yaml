@@ -1,5 +1,5 @@
 # Dependency to database "postgresql"
-secretName: secret-database-to-integrety-sum # Set the unique name for secret for database
+secretName: hasher-database-secret # Set the unique name for secret for database
 
 postgresql:
   auth:
@@ -16,10 +16,10 @@ postgresql:
         # Set by the initdb script during initial container startup
         00_init_extensions.sh: |
           #!/bin/sh
-          export PGPASSWORD=$POSTGRES_PASSWORD 
+          export PGPASSWORD=$POSTGRES_PASSWORD
           psql -w -d $POSTGRES_DB -U $POSTGRES_USER -c "
-          CREATE TABLE IF NOT EXISTS hashfiles 
-          ( 
+          CREATE TABLE IF NOT EXISTS hashfiles
+          (
           id                BIGSERIAL PRIMARY KEY,
           file_name         VARCHAR NOT NULL,
           full_file_path    TEXT    NOT NULL,

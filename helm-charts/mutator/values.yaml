@@ -7,7 +7,7 @@ mountPath: /ssl
 namespaceDep: default # namespace of cluster
 
 contName: k8s-webhook-injector-ws # name of the container
-image: dyslexicat/tcpdump-webhook # image name
+image: mutator:latest # image name
 pullPolicy: Never # pull policy for image
 
 containerPort: 8443 # port for the container

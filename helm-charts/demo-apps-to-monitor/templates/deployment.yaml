@@ -18,8 +18,8 @@ spec:
     metadata:
       labels:
         app: {{ .Values.metadata.appName }}
-        hasher-webhook-process-name: "{{ .Values.processName }}"
-        hasher-webhook-injector-sidecar: "true"
+        main-process-name: "{{ .Values.configMap.processName }}"
+        hasher-certificates-injector-sidecar: "true"
     spec:
       serviceAccountName: {{ .Values.serviceAccount }}
       shareProcessNamespace: true
