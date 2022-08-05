@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.metadata.deploymentName }}
+  name: {{ .Release.Name}}-{{ .Values.metadata.deploymentName }}
   labels:
     app: {{ .Values.metadata.appName }}
 spec:
@@ -18,10 +18,10 @@ spec:
     metadata:
       labels:
         app: {{ .Values.metadata.appName }}
-        hasher-webhook-process-name: "{{ .Values.processName }}"
-        hasher-webhook-injector-sidecar: "true"
+        main-process-name: "{{ .Values.configMap.processName }}"
+        hasher-certificates-injector-sidecar: "true"
     spec:
-      serviceAccountName: {{ .Values.serviceAccount }}
+      serviceAccountName: {{ .Release.Name}}-{{ .Values.serviceAccount }}
       shareProcessNamespace: true
       containers:
         - name: {{ .Values.container.name }}
