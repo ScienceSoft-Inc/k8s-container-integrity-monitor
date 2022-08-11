@@ -16,8 +16,8 @@ k8s-container-integrity-monitor, which is a type of change auditing, verifies an
 
 If program detects that files have been altered, updated, added or compromised, it rolls back deployments to a previous version.
 
-k8s-container-integrity-monitor injects a `hasher-webhook-injector-sidecar` to your pods with the "hasher-webhook-injector-sidecar" label.  
-`hasher-webhook-injector-sidecar` the implementation of a hasher in golang, which calculates the checksum of files using different algorithms in kubernetes:
+k8s-container-integrity-monitor injects a `hasher container` with Integrity-sum app to your pods with the "hasher-certificates-injector-sidecar" label.  
+`Integrity-sum app` is the implementation of a hash calculation in golang, which monitors the checksum of files using different algorithms in Kubernetes:
 * MD5
 * SHA256
 * SHA1
@@ -38,8 +38,13 @@ k8s-container-integrity-monitor injects a `hasher-webhook-injector-sidecar` to y
 
 ### Clone repository and install dependencies
 ```
-$ git clone https://github.com/ScienceSoft-Inc/k8s-container-integrity-monitor.git
 $ cd path/to/install
+$ git clone https://github.com/ScienceSoft-Inc/k8s-container-integrity-monitor.git
+```
+Initialize and update submodules
+```
+$ git submodule init
+$ git submodule update
 ```
 Download the named modules into the module cache
 ```
@@ -52,6 +57,10 @@ The code only works running inside a pod in Kubernetes.
 You need to have a Kubernetes cluster, and the kubectl command-line tool must be configured to communicate with your cluster.
 If you do not already have a cluster, you can create one by using `minikube`.  
 Example https://minikube.sigs.k8s.io/docs/start/
+
+### Install Docker
+To deploy app you need to install docker.  
+Example https://docs.docker.com/engine/install/
 
 ### Install Helm
 Before using helm charts you need to install helm on your local machine.  
@@ -68,21 +77,25 @@ To work properly, you first need to set the configuration files:
 ```
 minikube start
 ```
-1) You should go to the `README.md` in the `./k8s-container-integrity-mutator` project and set all the settings and certificates.
+1) You should go to the [README.md (Generate certificates)](https://github.com/ScienceSoft-Inc/k8s-container-integrity-mutator/blob/main/README.md) in the `./k8s-container-integrity-mutator` project and set all the settings and certificates.  
+
+Move patch-json-command to mutator directory:
+```
+cp patch-json-command.json integrity-mutator/
+```
 
 Build docker images mutator:
 ```
 eval $(minikube docker-env)
-cd k8s-container-integrity-mutator
+cd integrity-mutator
 docker build -t mutator
 ```
 or
 ```
 eval $(minikube docker-env)
-docker build -t mutator -f k8s-container-integrity-mutator/Dockerfile .
+docker build -t mutator -f integrity-mutator/Dockerfile .
 ```
-Install helm chart:
-for example
+Install helm chart, for example:
 ```
 helm install mutator helm-charts/mutator
 ```
@@ -91,14 +104,14 @@ helm install mutator helm-charts/mutator
 ```
 helm dependency update helm-charts/database-to-integrity-sum
 ```
-Install helm chart:
-for example
+Install helm chart, for example:
 ```
 helm install db helm-charts/database-to-integrity-sum
 ```
 
-3) You should go to the `README.md` in the `./integrity-sum` project and set all the settings.
-   Build docker images mutator:
+3) You should go to the `./integrity-sum` project and set environment variables in `.env` file.  
+   
+Build docker images hasher:
 ```
 eval $(minikube docker-env)
 cd integrity-sum
@@ -109,27 +122,30 @@ or
 eval $(minikube docker-env)
 docker build -t hasher -f integrity-sum/Dockerfile .
 ```
-Install helm chart:
-for example
+Install helm chart, for example:
 ```
 helm install app helm-charts/demo-apps-to-monitor
 ```
 
 ## Quick start
 ### Using Makefile
-
+You can use make function.  
+Runs all necessary cleaning targets and dependencies for the project according your OS:
+```
+make all-darwin
+make all-linux
+make all-windows
+```
+Remove an installed Helm deployments and stop minikube:
+```
+make stop
+```
 ## Troubleshooting
 Sometimes you may find that pod is injected with sidecar container as expected, check the following items:
 
 1) The pod is in running state with `hasher-sidecar` sidecar container injected and no error logs.
 2) Check if the application demo-pod has he correct labels `hasher-certificates-injector-sidecar: "true"` and installed `main-process-name`.
 ___________________________
-### :mag: Running tests
-
-You need to go to the folder where the file is located *_test.go and run the following command:
-```go
-go test -v ./..
-```
 
 ## License
 This project uses the MIT software license. See [full license file](https://github.com/ScienceSoft-Inc/k8s-container-integrity-monitor/blob/main/LICENSE)

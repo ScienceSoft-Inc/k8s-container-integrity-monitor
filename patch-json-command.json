@@ -9,7 +9,7 @@
     "envFrom": [
       {
         "secretRef": {
-          "name": "hasher-database-secret"
+          "name": "db-secret-database-to-integrity-sum"
         }
       }
     ],
