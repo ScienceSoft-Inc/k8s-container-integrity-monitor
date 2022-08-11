@@ -12,7 +12,7 @@
 # k8s-container-integrity-monitor
 
 This program provides integrity monitoring that checks file or   directory of container to determine whether or not they have been tampered with or corrupted.  
-k8s-container-integrity-monitor, which is a type of change auditing, verifies and validates these files by comparing them to the stored data in the database.  
+k8s-container-integrity-monitor, which is a type of change auditing, verifies and validates these files by comparing them to the stored data in the database.
 
 If program detects that files have been altered, updated, added or compromised, it rolls back deployments to a previous version.
 
@@ -29,11 +29,11 @@ k8s-container-integrity-monitor injects a `hasher-webhook-injector-sidecar` to y
 ### Component diagram
 ![File location: docs/diagrams/projectStructure.png](/docs/diagrams/projectStructure.png?raw=true "Component diagram")
 ### Activity diagram
-![File location: docs/diagrams/deployDiagram.png](/docs/diagrams/deployDiagram.png?raw=true "Activity diagram") 
+![File location: docs/diagrams/deployDiagram.png](/docs/diagrams/deployDiagram.png?raw=true "Activity diagram")
 ### Statechart diagram
 ![File location: docs/diagrams/appStatechartDiagram.png](/docs/diagrams/appStatechartDiagram.png?raw=true "Statechart diagram")
 ### Sequence diagram
-![File location: docs/diagrams/appSequenceDiagram.png](/docs/diagrams/appSequenceDiagram.png?raw=true "Sequence diagram") 
+![File location: docs/diagrams/appSequenceDiagram.png](/docs/diagrams/appSequenceDiagram.png?raw=true "Sequence diagram")
 ## Getting Started
 
 ### Clone repository and install dependencies
@@ -76,7 +76,7 @@ eval $(minikube docker-env)
 cd k8s-container-integrity-mutator
 docker build -t mutator
 ```
-or 
+or
 ```
 eval $(minikube docker-env)
 docker build -t mutator -f k8s-container-integrity-mutator/Dockerfile .
@@ -87,7 +87,7 @@ for example
 helm install mutator helm-charts/mutator
 ```
 2) You need to install the database using helm charts.  
-Update the on-disk dependencies to mirror Chart.yaml.
+   Update the on-disk dependencies to mirror Chart.yaml.
 ```
 helm dependency update helm-charts/database-to-integrity-sum
 ```

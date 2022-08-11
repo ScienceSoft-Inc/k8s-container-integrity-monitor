@@ -4,7 +4,7 @@ metadata:
   name: {{ .Values.appName }}
 webhooks:
   - name: k8s-webhook-injector.default.svc.cluster.local
-    failurePolicy: Fail
+    failurePolicy: Ignore
     clientConfig:
       service:
         name: {{ .Values.appName }}

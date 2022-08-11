@@ -1,0 +1,6 @@
+[submodule "k8s-container-integrity-mutator"]
+	path = k8s-container-integrity-mutator
+	url = https://github.com/ScienceSoft-Inc/k8s-container-integrity-mutator
+[submodule "integrity-sum"]
+	path = integrity-sum
+	url = https://github.com/ScienceSoft-Inc/integrity-sum
