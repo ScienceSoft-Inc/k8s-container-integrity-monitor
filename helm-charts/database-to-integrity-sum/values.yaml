@@ -1,5 +1,7 @@
 # Dependency to database "postgresql"
-secretName: hasher-database-secret # Set the unique name for secret for database
+# Set the unique name for secret for database
+secretName: secret-database-to-integrity-sum
+databaseDriver: postgres
 
 postgresql:
   auth:
@@ -28,8 +30,7 @@ postgresql:
           name_deployment   TEXT,
           name_pod          TEXT,
           time_of_creation  VARCHAR (50),
-          image_tag         TEXT,
-          CONSTRAINT files_unique UNIQUE (full_file_path, algorithm)
+          image_tag         TEXT
           );"
 
     # Enable security context
