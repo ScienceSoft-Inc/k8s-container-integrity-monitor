@@ -46,10 +46,6 @@ Initialize and update submodules
 $ git submodule init
 $ git submodule update
 ```
-Download the named modules into the module cache
-```
-go mod download
-```
 
 ## :hammer: Installing components
 ### Running locally
@@ -78,51 +74,71 @@ To work properly, you first need to set the configuration files:
 minikube start
 ```
 1) You should go to the [README.md (Generate certificates)](https://github.com/ScienceSoft-Inc/k8s-container-integrity-mutator/blob/main/README.md) in the `./k8s-container-integrity-mutator` project and set all the settings and certificates.  
+```
+cd integrity-mutator
+```
+Set certificates.
+
+You need to go to the file `patch-json-command.json`  
+and change `"envFrom":"secretRef":"name": "release db name and secret name"`  
+where `release db name and secret name` = will be release name db-variable value secretName in the file `helm-charts/database-to-integrity-sum/values.yaml`  
 
 Move patch-json-command to mutator directory:
 ```
+cd ./..
 cp patch-json-command.json integrity-mutator/
+```
+
+Download the named modules into the module cache
+```
+go mod download
 ```
 
 Build docker images mutator:
 ```
 eval $(minikube docker-env)
 cd integrity-mutator
-docker build -t mutator
+docker build -t mutator .
 ```
 or
 ```
 eval $(minikube docker-env)
 docker build -t mutator -f integrity-mutator/Dockerfile .
 ```
-Install helm chart, for example:
+Install helm chart from the project root, for example:
 ```
 helm install mutator helm-charts/mutator
 ```
-2) You need to install the database using helm charts.  
-   Update the on-disk dependencies to mirror Chart.yaml.
+2) You need to install the database using helm charts from the project root.  
+
+Update the on-disk dependencies to mirror Chart.yaml.
 ```
 helm dependency update helm-charts/database-to-integrity-sum
 ```
-Install helm chart, for example:
+Install helm chart from the project root, for example:
 ```
 helm install db helm-charts/database-to-integrity-sum
 ```
 
 3) You should go to the `./integrity-sum` project and set environment variables in `.env` file.  
-   
+
+Download the named modules into the module cache
+```
+go mod download
+```
+
 Build docker images hasher:
 ```
 eval $(minikube docker-env)
 cd integrity-sum
-docker build -t hasher
+docker build -t hasher .
 ```
 or
 ```
 eval $(minikube docker-env)
 docker build -t hasher -f integrity-sum/Dockerfile .
 ```
-Install helm chart, for example:
+Install helm chart from the project root, for example:
 ```
 helm install app helm-charts/demo-apps-to-monitor
 ```
