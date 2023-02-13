@@ -19,7 +19,8 @@ spec:
       labels:
         app: {{ .Values.metadata.appName }}
         main-process-name: "{{ .Values.configMap.processName }}"
-        hasher-certificates-injector-sidecar: "true"
+      annotations:
+        integrity-monitor/inject: "true"
     spec:
       serviceAccountName: {{ .Release.Name}}-{{ .Values.serviceAccount }}
       shareProcessNamespace: true
