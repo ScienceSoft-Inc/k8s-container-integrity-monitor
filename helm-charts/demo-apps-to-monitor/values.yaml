@@ -24,7 +24,3 @@ configMap:
   name: integrity-sum-config
   processName: nginx # Container process name
   mountPath: etc/nginx # Tracked folder path
-
-# Data secrets in the database
-secretNameDB: secret-database-to-integrity-sum
-releaseNameDB: db

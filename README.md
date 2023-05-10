@@ -11,19 +11,19 @@
 
 # k8s-container-integrity-monitor
 
-This program provides integrity monitoring that checks file or   directory of container to determine whether or not they have been tampered with or corrupted.  
-k8s-container-integrity-monitor, which is a type of change auditing, verifies and validates these files by comparing them to the stored data in the database.
+This program provides integrity monitoring that checks the container's file system to determine if they have been maliciously modified. If the program detects that files have been modified, updated, added, or compromised, it rolls back the deployment to the previous version.
+This application consists of two repositories: the [integrity-sum](https://github.com/ScienceSoft-Inc/integrity-sum) and the [integrity-mutator](https://github.com/ScienceSoft-Inc/k8s-container-integrity-mutator) .
 
-If program detects that files have been altered, updated, added or compromised, it rolls back deployments to a previous version.
-
-k8s-container-integrity-monitor injects a `hasher container` with Integrity-sum app to your pods with the "hasher-certificates-injector-sidecar" label.  
-`Integrity-sum app` is the implementation of a hash calculation in golang, which monitors the checksum of files using different algorithms in Kubernetes:
+Repository [integrity-sum](https://github.com/ScienceSoft-Inc/integrity-sum) injects hasher-sidecar into your modules as a sidecar container. sidecar integrity is a golang implementation of a hasher that calculates the checksum of files using various algorithms in kubernetes:
 * MD5
 * SHA256
 * SHA1
 * SHA224
 * SHA384
 * SHA512
+* BEE2 (optional)
+
+Repository [integrity-mutator](https://github.com/ScienceSoft-Inc/k8s-container-integrity-mutator) implements sidecar container for monitoring.
 
 ## Architecture
 ### Component diagram
@@ -44,11 +44,11 @@ $ git clone https://github.com/ScienceSoft-Inc/k8s-container-integrity-monitor.g
 Initialize and update submodules
 ```
 $ git submodule init
-$ git submodule update
+$ git submodule update --remote
 ```
 
 ## :hammer: Installing components
-### Running locally
+### Install minikube
 The code only works running inside a pod in Kubernetes.
 You need to have a Kubernetes cluster, and the kubectl command-line tool must be configured to communicate with your cluster.
 If you do not already have a cluster, you can create one by using `minikube`.  
@@ -69,75 +69,12 @@ To work properly, you first need to set the configuration files:
 + values in the file `helm-charts/mutator/values.yaml`
 
 ## Manual start
-+ Minikube start
-```
-minikube start
-```
-1) You should go to the [README.md (Generate certificates)](https://github.com/ScienceSoft-Inc/k8s-container-integrity-mutator/blob/main/README.md) in the `./k8s-container-integrity-mutator` project and set all the settings and certificates.  
-```
-cd integrity-mutator
-```
-Set certificates.
 
-You need to go to the file `patch-json-command.json`  
-and change `"envFrom":"secretRef":"name": "release db name and secret name"`  
-where `release db name and secret name` = will be release name db-variable value secretName in the file `helm-charts/database-to-integrity-sum/values.yaml`  
+1) You should go to the [README.md](https://github.com/ScienceSoft-Inc/k8s-container-integrity-mutator) in the `./integrity-mutator` project, set all the configurations and deploy.
 
-Move patch-json-command to mutator directory:
-```
-cd ./..
-cp patch-json-command.json integrity-mutator/
-```
+2) You should go to the [README.md](https://github.com/ScienceSoft-Inc/integrity-sum) in the `./integrity-sum`project  project, set all the configurations and deploy.
+   However, you need to go to the `"Run application"` section and configure the dependencies that are indicated by `"Need to install dependencies"`.
 
-Download the named modules into the module cache
-```
-go mod download
-```
-
-Build docker images mutator:
-```
-eval $(minikube docker-env)
-cd integrity-mutator
-docker build -t mutator .
-```
-or
-```
-eval $(minikube docker-env)
-docker build -t mutator -f integrity-mutator/Dockerfile .
-```
-Install helm chart from the project root, for example:
-```
-helm install mutator helm-charts/mutator
-```
-2) You need to install the database using helm charts from the project root.  
-
-Update the on-disk dependencies to mirror Chart.yaml.
-```
-helm dependency update helm-charts/database-to-integrity-sum
-```
-Install helm chart from the project root, for example:
-```
-helm install db helm-charts/database-to-integrity-sum
-```
-
-3) You should go to the `./integrity-sum` project and set environment variables in `.env` file.  
-
-Download the named modules into the module cache
-```
-go mod download
-```
-
-Build docker images hasher:
-```
-eval $(minikube docker-env)
-cd integrity-sum
-docker build -t hasher .
-```
-or
-```
-eval $(minikube docker-env)
-docker build -t hasher -f integrity-sum/Dockerfile .
-```
 Install helm chart from the project root, for example:
 ```
 helm install app helm-charts/demo-apps-to-monitor
@@ -146,21 +83,16 @@ helm install app helm-charts/demo-apps-to-monitor
 ## Quick start
 ### Using Makefile
 You can use make function.  
-Runs all necessary cleaning targets and dependencies for the project according your OS:
 ```
-make all-darwin
-make all-linux
-make all-windows
+make all
 ```
-Remove an installed Helm deployments and stop minikube:
-```
-make stop
-```
+
 ## Troubleshooting
+
 Sometimes you may find that pod is injected with sidecar container as expected, check the following items:
 
-1) The pod is in running state with `hasher-sidecar` sidecar container injected and no error logs.
-2) Check if the application demo-pod has he correct labels `hasher-certificates-injector-sidecar: "true"` and installed `main-process-name`.
+1) The pod is in running state with `integrity` sidecar container injected and no error logs.
+2) Check if the application pod has the correct annotations as described above.
 ___________________________
 
 ## License
