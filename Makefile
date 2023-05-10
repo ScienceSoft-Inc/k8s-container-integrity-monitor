@@ -1,6 +1,8 @@
-IMAGE_EXPORT := $(shell make -s -C integrity-sum -f Makefile print-var-image-name)
-ALG=$(shell make -s -C integrity-sum -f Makefile print-var-alg)
-DIRS="app,bin"	# You can change these values
+# You can change these values
+RELEASE_NAME_APP := app
+IMAGE_EXPORT := integrity:latest
+ALG := sha256
+DIRS := "app,bin"
 
 .PHONY : all
 all: minikube start-minio-integrity-crd snapshots start-mutator helm-demo
